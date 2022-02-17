@@ -2,7 +2,6 @@
 
 namespace App\HttpClients;
 
-use App\Traits\SignatureTrait;
 use GuzzleHttp\Client as Guzzle;
 
 class SFCClient extends Guzzle
@@ -22,9 +21,20 @@ class SFCClient extends Guzzle
         ]);
     }
 
+    /**
+     * Envia datos a la SFC
+     * @author Edwin David Sanchez Balbin
+     *
+     * @param string $method
+     * @param string $endpoint
+     * @param array $data
+     * @param boolean $withToken
+     * @return Object
+     */
     public function sendData(string $method, string $endpoint, array $data = [], bool $withToken = true) : Object
     {
         $headers = [];
+        $options = [];
         
         if ($withToken && session()->has('access')) {
             $headers['Authorization'] = 'Bearer ' . session('access');

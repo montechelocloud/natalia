@@ -14,8 +14,18 @@ class SSVClient extends Guzzle
         ]);
     }
 
+    /**
+     * Envia datos al SSV
+     * @author Edwin David Sanchez Balbin
+     *
+     * @param string $method
+     * @param string $endpoint
+     * @param array $data
+     * @return Object
+     */
     public function sendData(string $method, string $endpoint, array $data = []) : Object
     {
+        $options = [];
         if (isset($data['json'])) {
             $options['json'] = $data['json'];
         }

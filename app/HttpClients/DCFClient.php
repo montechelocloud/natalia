@@ -14,8 +14,19 @@ class DCFClient extends Guzzle
         ]);
     }
 
+    /**
+     * Envia datos al DCF
+     * @author Edwin David Sanchez Balbin
+     *
+     * @param string $method
+     * @param string $endpoint
+     * @param array $data
+     * @return Object
+     */
     public function sendData(string $method, string $endpoint, array $data = []) : Object
     {
+        $options = [];
+
         if (isset($data['json'])) {
             $options['json'] = $data['json'];
         }

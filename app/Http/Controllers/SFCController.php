@@ -2,23 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\HttpClients\DCFClient;
 use App\HttpClients\SFCClient;
+use App\Traits\CallControllerMethodTrait;
 use App\Traits\LogFailedRequestTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
 class SFCController extends Controller
 {
-    use LogFailedRequestTrait;
+    use LogFailedRequestTrait, CallControllerMethodTrait;
 
     private $sfcClient;
-    private $dcfClient;
 
-    public function __construct(SFCClient $sfcClient, DCFClient $dcfClient)
+    public function __construct()
     {
-        $this->sfcClient = $sfcClient;
-        $this->dcfClient = $dcfClient;
+        $this->sfcClient = new SFCClient;
 
         $this->verifyAccesses();
     }
@@ -246,9 +244,10 @@ class SFCController extends Controller
             'json' => $request->all()
         ];
         
+        
         $response = $this->sfcClient->sendData('POST', "queja/{$request->codigo_queja}", $data);
 
-        // $this->dcfClient->sendData('POST', "queja/{$request->codigo_queja}", $data);
+        $this->callControllerMethod('DCFController', 'updateComplaint', $data);
 
         $this->saveLogFailedRequest($request->path(), $response, $data);
 
