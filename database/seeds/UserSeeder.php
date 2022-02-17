@@ -14,23 +14,11 @@ class UserSeeder extends Seeder
      */
     public function run()
     {
-        $users = [
-            [
-                'name' => 'CRM_SMART',
-                'email' => 'crm@smart.com.co',
-                'password' => Hash::make('password'),
-                'is_internal' => true
-            ],
-            [
-                'name' => 'Defensor del Consumidor',
-                'email' => 'defensor@gov.com.co',
-                'password' => Hash::make('password'),
-                'is_internal' => false
-            ]
-        ];
-
-        foreach ($users as $user) {
-            DB::table('users')->insert($user);
-        }
+        DB::table('users')->insert([
+            'name' => 'Defensor del Consumidor',
+            'email' => 'defensor@gov.com.co',
+            'password' => Hash::make('password'),
+            'is_internal' => false
+        ]);
     }
 }

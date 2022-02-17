@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\HttpClients\DCFClient;
+use App\HttpClients\SFCClient;
+use App\HttpClients\SSVClient;
 use GuzzleHttp\Client;
 use Illuminate\Support\ServiceProvider;
 
@@ -14,20 +17,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $baseUrl = env('SFC_ENDPOINT');
-        $this->app->singleton(Client::class, function ($app) use ($baseUrl)
-        {
-            return new Client([
-                'base_uri' => $baseUrl,
-                'http_errors' => false,
-                'headers' => [
-                    'Cache-Control' => 'no-cache',
-                    'Accept' => 'aplication/json',
-                    'Content-type' => 'aplication/json',
-                    'Lenguage' => 'es-CO',
-                    'X-SFC-Signature' => '' 
-                ]
-            ]);
+        $this->app->singleton(SFCClient::class, function ($app) {
+            return new SFCClient();
+        });
+
+        $this->app->singleton(DCFClient::class, function ($app) {
+            return new DCFClient();
+        });
+
+        $this->app->singleton(SSVClient::class, function ($app) {
+            return new SSVClient();
         });
     }
 

@@ -18,15 +18,19 @@ use Illuminate\Support\Facades\Route;
 // });
 
 Route::post('login', 'UserController@authenticate');
+Route::post('dcf/login', 'DCFController@authenticate');
 
-Route::group(['middleware' => ['jwt.verify']], function() {
-    Route::middleware('platform')->group( function () {
-        Route::get('complaints', 'SFCController@getComplaints');
-        Route::get('complaint/show/{complaintId}', 'SFCController@getComplaint');
-        Route::post('ack', 'SFCController@ack');
-        Route::get('files', 'SFCController@getFiles');
-        Route::post('complaint/create', 'SFCController@createComplaint');
-        Route::post('file/upload', 'SFCController@fileUpload');
-        Route::post('complaint/update', 'SFCController@updateComplaint');
-    });
+Route::prefix('sfc')->group( function () {
+    Route::get('complaints', 'SFCController@getComplaints');
+    Route::get('complaints/show/{complaintId}', 'SFCController@getComplaint');
+    Route::post('ack', 'SFCController@ack');
+    Route::get('files', 'SFCController@getFiles');
+    Route::post('complaints/create', 'SFCController@createComplaint');
+    Route::post('file/upload', 'SFCController@fileUpload');
+    Route::post('complaints/update', 'SFCController@updateComplaint');
+});
+
+Route::middleware('jwt.verify')->prefix('ssv')->group( function () {
+    Route::post('complaints/create', 'SSVController@createComplaint');
+    Route::post('complaints/update', 'SSVdcfController@updateComplaint');
 });

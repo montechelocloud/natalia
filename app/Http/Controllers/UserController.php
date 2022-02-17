@@ -17,7 +17,13 @@ class UserController extends Controller
      */
     public function authenticate(Request $request)
     {
+        $request->validate([
+            'email'         => 'required|email',
+            'password'      => 'required|min:8',
+        ]);
+
         $credentials = $request->only('email', 'password');
+
         try {
             if (! $token = JWTAuth::attempt($credentials)) {
                 return response()->json(['error' => 'invalid_credentials'], 400);
@@ -25,6 +31,7 @@ class UserController extends Controller
         } catch (JWTException $e) {
             return response()->json(['error' => 'could_not_create_token'], 500);
         }
+        
         return response()->json(compact('token'));
     }
 }

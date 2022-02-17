@@ -2,21 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Traits\{LogFailedRequestTrait, RequestServiceTrait};
-use GuzzleHttp\Client;
+use App\HttpClients\DCFClient;
+use App\HttpClients\SFCClient;
+use App\Traits\LogFailedRequestTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
 class SFCController extends Controller
 {
-    use RequestServiceTrait, LogFailedRequestTrait;
+    use LogFailedRequestTrait;
 
-    private $client;
-    private $payload;
+    private $sfcClient;
+    private $dcfClient;
 
-    public function __construct(Client $client)
+    public function __construct(SFCClient $sfcClient, DCFClient $dcfClient)
     {
-        $this->client = $client;
+        $this->sfcClient = $sfcClient;
+        $this->dcfClient = $dcfClient;
 
         $this->verifyAccesses();
     }
@@ -29,9 +31,14 @@ class SFCController extends Controller
      */
     private function login()
     {
-        $this->payload = ['username' => env('SFC_USERNAME'), 'password' => env('SFC_PASSWORD')];
+        $data = [
+            'json' => [
+                'username' => env('SFC_USERNAME'),
+                'password' => env('SFC_PASSWORD')
+            ]
+        ];
 
-        $response = $this->jsonRequest('POST', 'login', $this->payload, false);
+        $response = $this->sfcClient->sendData('POST', 'login', $data, false);
 
         $this->setAccess($response);
 
@@ -46,7 +53,13 @@ class SFCController extends Controller
      */
     private function refresh()
     {
-        $response = $this->jsonRequest('POST', 'token/refresh', ['refresh' => session('refresh')]);
+        $data = [
+            'json' => [
+                'refresh' => session('refresh')
+            ]
+        ];
+
+        $response = $this->sfcClient->sendData('POST', 'token/refresh', $data);
 
         $this->setAccess($response);
         
@@ -62,9 +75,7 @@ class SFCController extends Controller
      */
     public function getComplaints(Request $request)
     {
-        $this->payload = 'api/queja';
-
-        $response = $this->jsonRequest('GET', 'queja');
+        $response = $this->sfcClient->sendData('GET', 'queja');
 
         $this->saveLogFailedRequest($request->path(), $response);
 
@@ -81,9 +92,7 @@ class SFCController extends Controller
      */
     public function getComplaint(int $complaintId, Request $request)
     {
-        $this->payload = "api/queja/$complaintId";
-
-        $response = $this->jsonRequest('POST', "queja/$complaintId");
+        $response = $this->sfcClient->sendData('POST', "queja/$complaintId");
 
         $this->saveLogFailedRequest($request->path(), $response, compact('complaintId'));
 
@@ -99,11 +108,17 @@ class SFCController extends Controller
      */
     public function ack(Request $request)
     {
-        $this->payload = $request->only('pqrs');
+        $request->validate([
+            'pqrs' => 'required|array'
+        ]);
 
-        $response = $this->jsonRequest('POST', 'complaint/ack', $this->payload);
+        $data = [
+            'json' => $request->only('pqrs')
+        ];
 
-        $this->saveLogFailedRequest($request->path(), $response, $this->payload);
+        $response = $this->sfcClient->sendData('POST', 'complaint/ack', $data);
+
+        $this->saveLogFailedRequest($request->path(), $response, $data);
 
         return response()->json($response);
     }
@@ -117,9 +132,7 @@ class SFCController extends Controller
      */
     public function getFiles(Request $request)
     {
-        $this->payload = 'api/storage';
-
-        $response = $this->jsonRequest('GET', 'storage');
+        $response = $this->sfcClient->sendData('GET', 'storage');
 
         $this->saveLogFailedRequest($request->path(), $response);
 
@@ -135,11 +148,34 @@ class SFCController extends Controller
      */
     public function createComplaint(Request $request)
     {
-        $this->payload = $request->all();
+        $request->validate([
+            'codigo_queja'      => 'required|string',
+            'codigo_pais'       => 'required|string',
+            'departamento_cod'  => 'required|string',
+            'municipio_cod'     => 'required|string',
+            'canal_cod'         => 'required|numeric',
+            'producto_cod'      => 'required|numeric',
+            'macro_motivo_cod'  => 'required|numeric',
+            'fecha_creacion'    => 'required|date',
+            'nombres'           => 'required|string',
+            'tipo_id_CF'        => 'required|numeric',
+            'numero_id_CF'      => 'required|string',
+            'tipo_persona'      => 'required|numeric',
+            'insta_recepcion'   => 'required|numeric',
+            'punto_recepcion'   => 'required|numeric',
+            'admision'          => 'required|numeric',
+            'texto_queja'       => 'required|string',
+            'anexo_queja'       => 'required|boolean',
+            'ente_control'      => 'required|numeric',
+        ]);
 
-        $response = $this->jsonRequest('POST', 'queja', $this->payload);
+        $data = [
+            'json' => $request->all()
+        ];
 
-        $this->saveLogFailedRequest($request->path(), $response, $this->payload);
+        $response = $this->sfcClient->sendData('POST', 'queja', $data);
+
+        $this->saveLogFailedRequest($request->path(), $response, $data);
 
         return response()->json($response);
     }
@@ -153,11 +189,20 @@ class SFCController extends Controller
      */
     public function fileUpload(Request $request)
     {
-        $this->payload = $request->only('codigo_queja', 'type');
+        $request->validate([
+            'file'          => 'required|file',
+            'codigo_queja'  => 'required|string',
+            'type'          => 'required|string'
+        ]);
 
-        $response = $this->jsonRequest('POST', 'storage', $request->all());
+        $data = [
+            'payload' => $request->only('codigo_queja', 'type'),
+            'multipart' => $request->all()
+        ];
 
-        $this->saveLogFailedRequest($request->path(), $response, $this->payload);
+        $response = $this->sfcClient->sendData('POST', 'storage', $data);
+
+        $this->saveLogFailedRequest($request->path(), $response, $data);
 
         return response()->json($response);
     }
@@ -171,11 +216,41 @@ class SFCController extends Controller
      */
     public function updateComplaint(Request $request)
     {
-        $this->payload = $request->all();
+        $request->validate([
+            'codigo_queja'              => 'required|string',
+            'sexo'                      => 'required|numeric',
+            'lgbtiq'                    => 'required|numeric',
+            'condicion_especial'        => 'required|numeric',
+            'canal_cod'                 => 'required|numeric',
+            'producto_cod'              => 'required|numeric',
+            'macro_motivo_cod'          => 'required|numeric',
+            'estado_cod'                => 'required|numeric',
+            'fecha_actualizacion'       => 'required|date',
+            'producto_digital'          => 'required|numeric',
+            'a_favor_de'                => 'required|numeric',
+            'aceptacion_queja'          => 'required|numeric',
+            'rectificacion_queja'       => 'required|numeric',
+            'desistimiento_queja'       => 'required|numeric',
+            'prorroga_queja'            => 'required|numeric',
+            'admision'                  => 'required|numeric',
+            'documentacion_rta_final'   => 'required|boolean',
+            'anexo_queja'               => 'required|boolean',
+            'fecha_cierre'              => 'required|date',
+            'tutela'                    => 'required|numeric',
+            'ente_control'              => 'required|numeric',
+            'marcacion'                 => 'required|numeric',
+            'queja_expres'              => 'required|numeric',
+        ]);
 
-        $response = $this->jsonRequest('POST', "queja/{$request->codigo_queja}", $this->payload);
+        $data = [
+            'json' => $request->all()
+        ];
+        
+        $response = $this->sfcClient->sendData('POST', "queja/{$request->codigo_queja}", $data);
 
-        $this->saveLogFailedRequest($request->path(), $response, $this->payload);
+        // $this->dcfClient->sendData('POST', "queja/{$request->codigo_queja}", $data);
+
+        $this->saveLogFailedRequest($request->path(), $response, $data);
 
         return response()->json($response);
     }
