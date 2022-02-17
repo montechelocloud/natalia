@@ -41,6 +41,6 @@ class DCFController extends Controller
 
         $this->saveLogFailedRequest('', $response, $data);
 
-        return response()->json($response);
+        return $response;
     }
 }
