@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\HttpClients\DCFClient;
+use App\Http\Clients\DCFClient;
 use Illuminate\Http\Request;
 
 class DCFController extends Controller
@@ -21,10 +21,17 @@ class DCFController extends Controller
      * @param Request $request
      * @return void
      */
-    public function authenticate(Request $request)
+    public function authenticate()
     {
-        $request->validate();
-        $response = $this->dcfClient->sendData('POST', '', []);
+        $data = [
+            'json' => [
+                'username' => env('DCF_USERNAME'),
+                'password' => env('DCF_PASSWORD')
+            ]
+        ];
+
+        $response = $this->dcfClient->sendData('POST', '', $data);
+
         return response()->json($response);
     }
 

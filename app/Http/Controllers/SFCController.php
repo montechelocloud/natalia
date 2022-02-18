@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\HttpClients\SFCClient;
+use App\Http\Clients\SFCClient;
+use App\Http\Requests\AckRequest;
+use App\Http\Requests\ComplaintCreateRequest;
+use App\Http\Requests\ComplaintUpdateRequest;
+use App\Http\Requests\FileUploadRequest;
 use App\Traits\CallControllerMethodTrait;
 use App\Traits\LogFailedRequestTrait;
 use Illuminate\Http\Request;
@@ -104,12 +108,8 @@ class SFCController extends Controller
      * @param Request $request
      * @return Illuminate\Http\Response
      */
-    public function ack(Request $request)
+    public function ack(AckRequest $request)
     {
-        $request->validate([
-            'pqrs' => 'required|array'
-        ]);
-
         $data = [
             'json' => $request->only('pqrs')
         ];
@@ -144,29 +144,8 @@ class SFCController extends Controller
      * @param Request $request
      * @return Illuminate\Http\Response
      */
-    public function createComplaint(Request $request)
+    public function createComplaint(ComplaintCreateRequest $request)
     {
-        $request->validate([
-            'codigo_queja'      => 'required|string',
-            'codigo_pais'       => 'required|string',
-            'departamento_cod'  => 'required|string',
-            'municipio_cod'     => 'required|string',
-            'canal_cod'         => 'required|numeric',
-            'producto_cod'      => 'required|numeric',
-            'macro_motivo_cod'  => 'required|numeric',
-            'fecha_creacion'    => 'required|date',
-            'nombres'           => 'required|string',
-            'tipo_id_CF'        => 'required|numeric',
-            'numero_id_CF'      => 'required|string',
-            'tipo_persona'      => 'required|numeric',
-            'insta_recepcion'   => 'required|numeric',
-            'punto_recepcion'   => 'required|numeric',
-            'admision'          => 'required|numeric',
-            'texto_queja'       => 'required|string',
-            'anexo_queja'       => 'required|boolean',
-            'ente_control'      => 'required|numeric',
-        ]);
-
         $data = [
             'json' => $request->all()
         ];
@@ -185,14 +164,8 @@ class SFCController extends Controller
      * @param Request $request
      * @return Illuminate\Http\Response
      */
-    public function fileUpload(Request $request)
+    public function fileUpload(FileUploadRequest $request)
     {
-        $request->validate([
-            'file'          => 'required|file',
-            'codigo_queja'  => 'required|string',
-            'type'          => 'required|string'
-        ]);
-
         $data = [
             'payload' => $request->only('codigo_queja', 'type'),
             'multipart' => $request->all()
@@ -212,38 +185,11 @@ class SFCController extends Controller
      * @param Request $request
      * @return Illuminate\Http\Response
      */
-    public function updateComplaint(Request $request)
+    public function updateComplaint(ComplaintUpdateRequest $request)
     {
-        $request->validate([
-            'codigo_queja'              => 'required|string',
-            'sexo'                      => 'required|numeric',
-            'lgbtiq'                    => 'required|numeric',
-            'condicion_especial'        => 'required|numeric',
-            'canal_cod'                 => 'required|numeric',
-            'producto_cod'              => 'required|numeric',
-            'macro_motivo_cod'          => 'required|numeric',
-            'estado_cod'                => 'required|numeric',
-            'fecha_actualizacion'       => 'required|date',
-            'producto_digital'          => 'required|numeric',
-            'a_favor_de'                => 'required|numeric',
-            'aceptacion_queja'          => 'required|numeric',
-            'rectificacion_queja'       => 'required|numeric',
-            'desistimiento_queja'       => 'required|numeric',
-            'prorroga_queja'            => 'required|numeric',
-            'admision'                  => 'required|numeric',
-            'documentacion_rta_final'   => 'required|boolean',
-            'anexo_queja'               => 'required|boolean',
-            'fecha_cierre'              => 'required|date',
-            'tutela'                    => 'required|numeric',
-            'ente_control'              => 'required|numeric',
-            'marcacion'                 => 'required|numeric',
-            'queja_expres'              => 'required|numeric',
-        ]);
-
         $data = [
             'json' => $request->all()
         ];
-        
         
         $response = $this->sfcClient->sendData('POST', "queja/{$request->codigo_queja}", $data);
 

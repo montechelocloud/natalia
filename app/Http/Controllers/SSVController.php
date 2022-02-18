@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\HttpClients\SSVClient;
+use App\Http\Clients\SSVClient;
 use Illuminate\Http\Request;
 
 class SSVController extends Controller

@@ -1,21 +1,21 @@
 <?php
 
-namespace App\HttpClients;
+namespace App\Http\Clients;
 
 use GuzzleHttp\Client as Guzzle;
 
-class SSVClient extends Guzzle
+class DCFClient extends Guzzle
 {
     public function __construct()
     {
         parent::__construct([
-            'base_uri' => env('SSV_ENDPOINT'),
+            'base_uri' => env('DCF_ENDPOINT'),
             'http_errors' => false,
         ]);
     }
 
     /**
-     * Envia datos al SSV
+     * Envia datos al DCF
      * @author Edwin David Sanchez Balbin
      *
      * @param string $method
@@ -26,6 +26,7 @@ class SSVClient extends Guzzle
     public function sendData(string $method, string $endpoint, array $data = []) : Object
     {
         $options = [];
+
         if (isset($data['json'])) {
             $options['json'] = $data['json'];
         }
@@ -36,5 +37,4 @@ class SSVClient extends Guzzle
 
         return $response;
     }
-
 }

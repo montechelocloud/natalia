@@ -18,7 +18,6 @@ use Illuminate\Support\Facades\Route;
 // });
 
 Route::post('login', 'UserController@authenticate');
-Route::post('dcf/login', 'DCFController@authenticate');
 
 Route::prefix('sfc')->group( function () {
     Route::get('complaints', 'SFCController@getComplaints');
