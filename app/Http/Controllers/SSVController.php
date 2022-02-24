@@ -9,9 +9,9 @@ class SSVController extends Controller
 {
     private $ssvClient;
 
-    public function __construct()
+    public function __construct(SSVClient $ssvClient)
     {
-        $this->ssvClient = new SSVClient;    
+        $this->ssvClient = $ssvClient;    
     }
 
     /**
@@ -29,7 +29,7 @@ class SSVController extends Controller
 
         $this->saveLogFailedRequest($request->path(), $response, []);
 
-        return response()->json($response);
+        return response()->json($response, $response->status());
     }
 
     /**
@@ -47,6 +47,6 @@ class SSVController extends Controller
 
         $this->saveLogFailedRequest($request->path(), $response, []);
 
-        return response()->json($response);
+        return response()->json($response, $response->status());
     }
 }

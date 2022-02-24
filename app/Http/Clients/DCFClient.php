@@ -4,11 +4,13 @@ namespace App\Http\Clients;
 
 use GuzzleHttp\Client as Guzzle;
 
-class DCFClient extends Guzzle
+class DCFClient
 {
+    protected $client;
+
     public function __construct()
     {
-        parent::__construct([
+        $this->client = new Guzzle([
             'base_uri' => env('DCF_ENDPOINT'),
             'http_errors' => false,
         ]);
@@ -31,7 +33,7 @@ class DCFClient extends Guzzle
             $options['json'] = $data['json'];
         }
 
-        $response = parent::request($method, $endpoint, $options);
+        $response = $this->client->request($method, $endpoint, $options);
 
         $response = json_decode($response->getBody()->getContents());
 

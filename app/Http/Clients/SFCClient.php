@@ -4,17 +4,17 @@ namespace App\Http\Clients;
 
 use GuzzleHttp\Client as Guzzle;
 
-class SFCClient extends Guzzle
+class SFCClient
 {
+    protected $client;
+
     public function __construct()
     {
-        parent::__construct([
+        $this->client = new Guzzle([
             'base_uri' => env('SFC_ENDPOINT'),
             'http_errors' => false,
             'headers' => [
                 'Cache-Control' => 'no-cache',
-                'Accept' => 'aplication/json',
-                'Content-type' => 'aplication/json',
                 'Lenguage' => 'es-CO',
                 'X-SFC-Signature' => ''
             ]
@@ -35,12 +35,13 @@ class SFCClient extends Guzzle
     {
         $headers = [];
         $options = [];
-        
+
         if ($withToken && session()->has('access')) {
             $headers['Authorization'] = 'Bearer ' . session('access');
         }
         
         if (isset($data['json'])) {
+            $headers['Content-type'] = 'aplication/json';
             $options['json'] = $data['json'];
             $headers['X-SFC-Signature'] = $this->getSignature($data['json']);
         } elseif (isset($data['payload'])) {
@@ -50,13 +51,13 @@ class SFCClient extends Guzzle
         }
 
         if (isset($data['multipart'])) {
+            $headers['Content-type'] = 'multipart/form-data';
             $options['multipart'] = $data['multipart'];
         }
 
-        $options = ['headers' => $headers];
+        $options['headers'] = $headers;
 
-        $response = parent::request($method, $endpoint, $options);
-
+        $response = $this->client->request($method, $endpoint, $options);
         $response = json_decode($response->getBody()->getContents());
 
         return $response;
@@ -78,7 +79,7 @@ class SFCClient extends Guzzle
         } else if (gettype($payload) == 'string') {
             $payload = ['endpoint' => $payload];
         }
-
+        $payload = json_encode($payload);
         $payload = base64_encode($payload);
 
         $signature = hash_hmac('SHA256', "$header.$payload", env('SFC_SECRET_KEY'));

@@ -18,9 +18,9 @@ class SFCController extends Controller
 
     private $sfcClient;
 
-    public function __construct()
+    public function __construct(SFCClient $sfcClient)
     {
-        $this->sfcClient = new SFCClient;
+        $this->sfcClient = $sfcClient;
 
         $this->verifyAccesses();
     }
@@ -45,6 +45,7 @@ class SFCController extends Controller
         $this->setAccess($response);
 
         $this->saveLogFailedRequest('',$response);
+        
     }
 
     /**
@@ -81,7 +82,7 @@ class SFCController extends Controller
 
         $this->saveLogFailedRequest($request->path(), $response);
 
-        return response()->json($response);
+        return response()->json($response, $response->status_code);
     }
 
     /**
@@ -98,7 +99,7 @@ class SFCController extends Controller
 
         $this->saveLogFailedRequest($request->path(), $response, compact('complaintId'));
 
-        return response()->json($response);
+        return response()->json($response, $response->status_code);
     }
 
     /**
@@ -118,24 +119,41 @@ class SFCController extends Controller
 
         $this->saveLogFailedRequest($request->path(), $response, $data);
 
-        return response()->json($response);
+        return response()->json($response, $response->status_code);
     }
 
     /**
-     * Obtiene los archivos de las quejas.
+     * Obtiene el archivo solicitado.
      * @author Edwin David Sanchez Balbin
      *
+     * @param integer $fileId 
      * @param Request $request
      * @return Illuminate\Http\Response
      */
-    public function getFiles(Request $request)
+    public function getFile(int $fileId = 0, Request $request)
     {
-        $response = $this->sfcClient->sendData('GET', 'storage');
+        $response = $this->sfcClient->sendData('GET', "storage/$fileId");
+        
+        $this->saveLogFailedRequest($request->path(), $response);
+        
+        return response()->json($response, $response->status_code);
+    }
+    
+    /**
+     * Obtiene los archivos de las quejas.
+     *
+     * @param string $complaintId
+     * @param Request $request
+     * @return void
+     */
+    public function getComplaintFiles(string $complaintId, Request $request)
+    {
+        $response = $this->sfcClient->sendData('GET', "storage/?codigo_queja__codigo_queja=$complaintId");
 
         $this->saveLogFailedRequest($request->path(), $response);
-
-        return response()->json($response);
-    }
+        
+        return response()->json($response, $response->status_code);
+    } 
 
     /**
      * Crear queja.
@@ -154,7 +172,7 @@ class SFCController extends Controller
 
         $this->saveLogFailedRequest($request->path(), $response, $data);
 
-        return response()->json($response);
+        return response()->json($response, $response->status_code);
     }
 
     /**
@@ -175,7 +193,7 @@ class SFCController extends Controller
 
         $this->saveLogFailedRequest($request->path(), $response, $data);
 
-        return response()->json($response);
+        return response()->json($response, $response->status_code);
     }
 
     /**
@@ -193,11 +211,21 @@ class SFCController extends Controller
         
         $response = $this->sfcClient->sendData('POST', "queja/{$request->codigo_queja}", $data);
 
-        $this->callControllerMethod('DCFController', 'updateComplaint', $data);
+        if ($response->status_code == 200) {
+
+            $dcfResponse = $this->callControllerMethod('DCFController', 'updateComplaint', $data);
+            //! No esta definida la respuesta de la Defensoria
+            //! Tener en cuenta para darle el respectivo tratamiento
+            //! para notificar al crm { -->
+            if ($dcfResponse->status_code == 200) {
+                $response->dcfResponse = $dcfResponse;
+            }
+            //! --< } 
+        }
 
         $this->saveLogFailedRequest($request->path(), $response, $data);
 
-        return response()->json($response);
+        return response()->json($response, $response->status_code);
     }
 
     /**

@@ -2,10 +2,9 @@
 
 namespace App\Providers;
 
-use App\HttpClients\DCFClient;
-use App\HttpClients\SFCClient;
-use App\HttpClients\SSVClient;
-use GuzzleHttp\Client;
+use App\Http\Clients\DCFClient;
+use App\Http\Clients\SFCClient;
+use App\Http\Clients\SSVClient;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -17,7 +16,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $this->app->singleton(SFCClient::class, function ($app) {
+            return new SFCClient();
+        });
+
+        $this->app->singleton(DCFClient::class, function ($app) {
+            return new DCFClient();
+        });
+
+        $this->app->singleton(SSVClient::class, function ($app) {
+            return new SSVClient();
+        });
     }
 
     /**
