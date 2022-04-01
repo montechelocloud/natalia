@@ -10,10 +10,10 @@ class UserController extends Controller
 {
     /**
      * Verifica que el usuario exista y le regresa un token de acceso.
-     * @author Edwin David Sanchez Balbin
+     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co>
      *
      * @param Request $request
-     * @return void
+     * @return Illuminate\Http\Response
      */
     public function authenticate(Request $request)
     {

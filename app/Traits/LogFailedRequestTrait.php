@@ -8,7 +8,7 @@ trait LogFailedRequestTrait
 {
     /**
      * Registra las peticiones fallidas y los mensajes de error.
-     * @author Edwin David Sanchez Balbin
+     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co>
      *
      * @param object $response
      * @param array $data
@@ -16,7 +16,6 @@ trait LogFailedRequestTrait
      */
     public function saveLogFailedRequest($statusCode, object $response, array $data = [])
     {
-        // dd($response, $response->message ?? $response->messages ?? $response->error);
         LogFailedRequest::created([
             'request_data' => json_encode($data),
             'status_code' => $statusCode,

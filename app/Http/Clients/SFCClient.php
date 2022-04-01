@@ -22,15 +22,15 @@ class SFCClient
 
     /**
      * Envia datos a la SFC
-     * @author Edwin David Sanchez Balbin
+     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co>
      *
      * @param string $method
      * @param string $endpoint
      * @param array $data
      * @param boolean $withToken
-     * @return Object
+     * @return object
      */
-    public function sendData(string $method, string $endpoint, array $data = [], bool $withToken = true) : Object
+    public function sendData(string $method, string $endpoint, array $data = [], bool $withToken = true) : object
     {
         $headers = [];
         $options = [];
@@ -54,7 +54,6 @@ class SFCClient
         
         $options['headers'] = $headers;
         
-        // dd($options, env('SFC_ENDPOINT') . $endpoint);
         $response = $this->client->request($method, $endpoint, $options);
         $statusCode = $response->getStatusCode();
         $response = json_decode($response->getBody()->getContents());
@@ -72,7 +71,7 @@ class SFCClient
 
     /**
      * Genera la firma de las peticiones.
-     * @author Edwin David Sanchez Balbin
+     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co>
      *
      * @return string
      */
@@ -85,6 +84,7 @@ class SFCClient
 
     /**
      * Pasa los arreglos a un json codificado como string.
+     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co>
      *
      * @param mixed $data
      * @return string
@@ -100,6 +100,13 @@ class SFCClient
         return $data;
     }
 
+    /**
+     * Añade la cabecera de autorizacion si se necesita enviar el token de autorización.
+     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co>
+     *
+     * @param boolean $withToken
+     * @return array
+     */
     private function changeHeaders(bool $withToken) : array
     {
         $headers = [

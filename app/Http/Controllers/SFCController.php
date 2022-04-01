@@ -198,7 +198,7 @@ class SFCController extends Controller
 
     /**
      * Carga un archivo.
-     * @author Edwin David Sanchez Balbin
+     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co>
      *
      * @param Request $request
      * @return Illuminate\Http\Response
@@ -242,7 +242,7 @@ class SFCController extends Controller
 
     /**
      * Actualizar una queja
-     * @author Edwin David Sanchez Balbin
+     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co>
      *
      * @param Request $request
      * @return Illuminate\Http\Response
@@ -281,7 +281,6 @@ class SFCController extends Controller
 
         $data = [
             'json' => $request->all()
-            // 'json' => $request->except('codigo_queja')
         ];
         
         $response = $this->sfcClient->sendData('PUT', "queja/{$request->codigo_queja}/", $data);
@@ -303,7 +302,7 @@ class SFCController extends Controller
 
     /**
      * Verifica que la caducidad de los tokens, para solicitarlos de nuevo.
-     * @author Edwin David Sanchez Balbin
+     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co>
      *
      * @return void
      */
@@ -327,7 +326,7 @@ class SFCController extends Controller
 
     /**
      * Establece los tokens de acceso en la session y en el momento que caducan.
-     * @author Edwin David Sanchez Balbin
+     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co>
      *
      * @param object $response
      * @return void

@@ -21,14 +21,14 @@ class DCFClient
 
     /**
      * Envia datos al DCF
-     * @author Edwin David Sanchez Balbin
+     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co>
      *
      * @param string $method
      * @param string $endpoint
      * @param array $data
-     * @return Object
+     * @return object
      */
-    public function sendData(string $method, string $endpoint, array $data = []) : Object
+    public function sendData(string $method, string $endpoint, array $data = []) : object
     {
         $options = [];
 

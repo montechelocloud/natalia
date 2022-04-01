@@ -17,14 +17,13 @@ class SSVController extends Controller
 
     /**
      * Crea una queja en el SSV
-     * @author Edwin David Sanchez Balbin
+     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co>
      *
      * @param Request $request
-     * @return void
+     * @return Illuminate\Http\Response
      */
     public function createComplaint(Request $request)
     {
-        dd($request->all());
         // $validator = Validator::make($request->all(), []);
 
         // if ($validator->fails()) {
@@ -38,14 +37,13 @@ class SSVController extends Controller
 
     /**
      * Actualia una queja en el SSV
-     * @author Edwin David Sanchez Balbin
+     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co>
      *
      * @param Request $request
-     * @return void
+     * @return Illuminate\Http\Response
      */
     public function updateComplaint(Request $request)
     {
-        dd($request->all());
         // $validator = Validator::make($request->all(), []);
 
         // if ($validator->fails()) {

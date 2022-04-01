@@ -19,7 +19,7 @@ class DCFController extends Controller
 
     /**
      * Autentica (loguea) al web service en la plataforma del DCF (Defensor al Consumidor)
-     * @author Edwin David Sanchez Balbin
+     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co>
      *
      * @param Request $request
      * @return void
@@ -44,7 +44,7 @@ class DCFController extends Controller
 
     /**
      * Actualiza la queja en el DCF
-     * @author Edwin David Sanchez Balbin
+     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co>
      *
      * @param array $data
      * @return object
@@ -58,7 +58,7 @@ class DCFController extends Controller
 
     /**
      * Establece los tokens de acceso en la session y en el momento que caducan.
-     * @author Edwin David Sanchez Balbin
+     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co>
      *
      * @param object $response
      * @return void
@@ -77,7 +77,7 @@ class DCFController extends Controller
 
     /**
      * Verifica que la caducidad de los tokens, para solicitarlos de nuevo.
-     * @author Edwin David Sanchez Balbin
+     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co>
      *
      * @return void
      */

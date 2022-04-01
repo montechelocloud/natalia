@@ -6,7 +6,7 @@ trait CallControllerMethodTrait
 {
     /**
      * Llama al metodo del controlador solicitado y le pasa los datos como parametro
-     * @author Edwin David Sanchez Balbin
+     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co>
      *
      * @param string $controller
      * @param string $method
