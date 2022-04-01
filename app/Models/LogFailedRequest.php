@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class LogFailedRequest extends Model
 {
     protected $fillable = [
-        'request_url',
         'request_data',
         'status_code',
         'messages',

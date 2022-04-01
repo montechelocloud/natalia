@@ -2,10 +2,13 @@
 
 namespace App\Http\Clients;
 
+use App\Traits\LogFailedRequestTrait;
 use GuzzleHttp\Client as Guzzle;
 
 class DCFClient
 {
+    use LogFailedRequestTrait;
+
     protected $client;
 
     public function __construct()
@@ -34,8 +37,16 @@ class DCFClient
         }
 
         $response = $this->client->request($method, $endpoint, $options);
-
+        $statusCode = $response->getStatusCode();
         $response = json_decode($response->getBody()->getContents());
+
+        if ($statusCode == 500 && is_null($response)) {
+            $response = (object) ['error' => 'Internal Server Error'];
+        }
+
+        if ($statusCode != 200 && $statusCode != 201) {
+            $this->saveLogFailedRequest($statusCode, $response, $data);
+        }
 
         return $response;
     }

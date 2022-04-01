@@ -16,7 +16,6 @@ class CreateLogFailedRequestsTable extends Migration
     {
         Schema::create('log_failed_requests', function (Blueprint $table) {
             $table->id();
-            $table->text('request_url')->comment('Url de donde se realia la petición.');
             $table->longText('request_data')->comment('Datos de la petición.');
             $table->integer('status_code')->comment('Codigo de error.');
             $table->text('messages')->nullable()->comment('Mensaje del error.');

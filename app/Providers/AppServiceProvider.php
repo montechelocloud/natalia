@@ -16,10 +16,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton(SFCClient::class, function ($app) {
-            return new SFCClient();
-        });
-
         $this->app->singleton(DCFClient::class, function ($app) {
             return new DCFClient();
         });

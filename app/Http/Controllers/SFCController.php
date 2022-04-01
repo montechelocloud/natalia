@@ -3,31 +3,31 @@
 namespace App\Http\Controllers;
 
 use App\Http\Clients\SFCClient;
-use App\Http\Requests\AckRequest;
-use App\Http\Requests\ComplaintCreateRequest;
-use App\Http\Requests\ComplaintUpdateRequest;
-use App\Http\Requests\FileUploadRequest;
 use App\Traits\CallControllerMethodTrait;
-use App\Traits\LogFailedRequestTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Validator;
 
 class SFCController extends Controller
 {
-    use LogFailedRequestTrait, CallControllerMethodTrait;
+    use CallControllerMethodTrait;
 
     private $sfcClient;
+    private $entityType;
+    private $entityCode;
 
     public function __construct(SFCClient $sfcClient)
     {
         $this->sfcClient = $sfcClient;
+        $this->entityType = (int) env('SFC_ENTITY_TYPE');
+        $this->entityCode = env('SFC_ENTITY_CODE');
 
         $this->verifyAccesses();
     }
 
     /**
      * Loguea al web service en la SFC (Superintendencia Financiera de Colombia).
-     * @author Edwin David Sanchez Balbin 
+     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co> 
      *
      * @return void
      */
@@ -40,17 +40,14 @@ class SFCController extends Controller
             ]
         ];
 
-        $response = $this->sfcClient->sendData('POST', 'login', $data, false);
+        $response = (new SFCClient(false))->sendData('POST', 'login', $data, false);
 
-        $this->setAccess($response);
-
-        $this->saveLogFailedRequest('',$response);
-        
+        $this->setAccess($response);        
     }
 
     /**
      * Refresca el token de acceso a la SFC (Superintendencia Financiera de Colombia).
-     * @author Edwin David Sanchez Balbin 
+     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co> 
      *
      * @return void
      */
@@ -58,121 +55,145 @@ class SFCController extends Controller
     {
         $data = [
             'json' => [
-                'refresh' => session('refresh')
+                'refresh' => session('refresh')['token']
             ]
         ];
 
         $response = $this->sfcClient->sendData('POST', 'token/refresh', $data);
 
+        if (isset($response->status_code)) {
+            $this->login();
+        }
+
         $this->setAccess($response);
-        
-        $this->saveLogFailedRequest('', $response);
     }
 
     /**
      * Obtiene todas las quejas.
-     * @author Edwin David Sanchez Balbin 
+     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co> 
      *
-     * @param Request $request
      * @return Illuminate\Http\Response
      */
-    public function getComplaints(Request $request)
+    public function getComplaints()
     {
-        $response = $this->sfcClient->sendData('GET', 'queja');
+        $response = $this->sfcClient->sendData('GET', 'queja/');
 
-        $this->saveLogFailedRequest($request->path(), $response);
-
-        return response()->json($response, $response->status_code);
+        return response()->json($response, 200);
     }
 
     /**
      * Obtiene la queja solicitada.
-     * @author Edwin David Sanchez Balbin
+     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co>
      *
      * @param integer $complaintId
-     * @param Request $request
      * @return Illuminate\Http\Response
      */
-    public function getComplaint(int $complaintId, Request $request)
+    public function getComplaint(int $complaintId)
     {
-        $response = $this->sfcClient->sendData('POST', "queja/$complaintId");
+        $response = $this->sfcClient->sendData('GET', "queja/$complaintId/");
 
-        $this->saveLogFailedRequest($request->path(), $response, compact('complaintId'));
-
-        return response()->json($response, $response->status_code);
+        return response()->json($response, $response->status_code ?? 200);
     }
 
     /**
      * Sincroniza los pqrs.
-     * @author Edwin David Sanchez Balbin
+     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co>
      *
      * @param Request $request
      * @return Illuminate\Http\Response
      */
-    public function ack(AckRequest $request)
+    public function ack(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'pqrs' => 'required|array'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 200);
+        }
+        
         $data = [
             'json' => $request->only('pqrs')
         ];
 
         $response = $this->sfcClient->sendData('POST', 'complaint/ack', $data);
 
-        $this->saveLogFailedRequest($request->path(), $response, $data);
-
-        return response()->json($response, $response->status_code);
+        return response()->json($response, 200);
     }
 
     /**
      * Obtiene el archivo solicitado.
-     * @author Edwin David Sanchez Balbin
+     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co>
      *
      * @param integer $fileId 
-     * @param Request $request
      * @return Illuminate\Http\Response
      */
-    public function getFile(int $fileId = 0, Request $request)
+    public function getFile(int $fileId)
     {
-        $response = $this->sfcClient->sendData('GET', "storage/$fileId");
+        $response = $this->sfcClient->sendData('GET', "storage/$fileId/");
         
-        $this->saveLogFailedRequest($request->path(), $response);
-        
-        return response()->json($response, $response->status_code);
+        return response()->json($response, $response->status_code ?? 200);
     }
     
     /**
      * Obtiene los archivos de las quejas.
+     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co>
      *
      * @param string $complaintId
-     * @param Request $request
      * @return void
      */
-    public function getComplaintFiles(string $complaintId, Request $request)
+    public function getComplaintFiles(string $complaintId)
     {
         $response = $this->sfcClient->sendData('GET', "storage/?codigo_queja__codigo_queja=$complaintId");
-
-        $this->saveLogFailedRequest($request->path(), $response);
         
-        return response()->json($response, $response->status_code);
+        return response()->json($response, 200);
     } 
 
     /**
      * Crear queja.
-     * @author Edwin David Sanchez Balbin
+     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co>
      *
      * @param Request $request
      * @return Illuminate\Http\Response
      */
-    public function createComplaint(ComplaintCreateRequest $request)
+    public function createComplaint(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'codigo_queja'      => 'required|string',
+            'codigo_pais'       => 'required|numeric',
+            'departamento_cod'  => 'required|string',
+            'municipio_cod'     => 'required|string',
+            'canal_cod'         => 'required|numeric',
+            'producto_cod'      => 'required|numeric',
+            'macro_motivo_cod'  => 'required|numeric',
+            'fecha_creacion'    => 'required|date',
+            'nombres'           => 'required|string',
+            'tipo_id_CF'        => 'required|numeric',
+            'numero_id_CF'      => 'required|string',
+            'tipo_persona'      => 'required|numeric',
+            'insta_recepcion'   => 'required|numeric',
+            'punto_recepcion'   => 'required|numeric',
+            'admision'          => 'required|numeric',
+            'texto_queja'       => 'required|string',
+            'anexo_queja'       => 'required|boolean|numeric',
+            'ente_control'      => 'required|numeric',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 200);
+        }
+
         $data = [
-            'json' => $request->all()
+            'json' => array_merge([
+                'tipo_entidad' => $this->entityType,
+                'entidad_cod' => $this->entityCode,
+                'codigo_queja' => $this->entityType . $this->entityCode . $request->codigo_queja
+            ], $request->except('codigo_queja'))
         ];
 
-        $response = $this->sfcClient->sendData('POST', 'queja', $data);
+        $response = $this->sfcClient->sendData('POST', 'queja/', $data);
 
-        $this->saveLogFailedRequest($request->path(), $response, $data);
-
-        return response()->json($response, $response->status_code);
+        return response()->json($response, $response->status_code ?? 200);
     }
 
     /**
@@ -182,18 +203,41 @@ class SFCController extends Controller
      * @param Request $request
      * @return Illuminate\Http\Response
      */
-    public function fileUpload(FileUploadRequest $request)
+    public function fileUpload(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'file'          => 'required|file',
+            'codigo_queja'  => 'required|string',
+            'type'          => 'required|string'
+        ]);
+        
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 200);
+        }
+
+        $multipartData = [];
+
+        foreach ($request->all() as $key => $value) {
+            if ($key == 'file') {
+                $file = $request->file('file');
+                $multipartData[] = [
+                    'name' => $key,
+                    'contents' => $file->getContent(),
+                    'filename' => $file->getClientOriginalName(),
+                ]; 
+            } else {
+                $multipartData[] = ['name' => $key, 'contents' => $value]; 
+            }
+        }
+
         $data = [
             'payload' => $request->only('codigo_queja', 'type'),
-            'multipart' => $request->all()
+            'multipart' => $multipartData,
         ];
 
-        $response = $this->sfcClient->sendData('POST', 'storage', $data);
+        $response = $this->sfcClient->sendData('POST', 'storage/', $data);
 
-        $this->saveLogFailedRequest($request->path(), $response, $data);
-
-        return response()->json($response, $response->status_code);
+        return response()->json($response, $response->status_code ?? 200);
     }
 
     /**
@@ -203,13 +247,44 @@ class SFCController extends Controller
      * @param Request $request
      * @return Illuminate\Http\Response
      */
-    public function updateComplaint(ComplaintUpdateRequest $request)
+    public function updateComplaint(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'codigo_queja'              => 'required|string',
+            'sexo'                      => 'required|numeric',
+            'lgbtiq'                    => 'required|numeric',
+            'condicion_especial'        => 'required|numeric',
+            'canal_cod'                 => 'required|numeric',
+            'producto_cod'              => 'required|numeric',
+            'macro_motivo_cod'          => 'required|numeric',
+            'estado_cod'                => 'required|numeric',
+            'fecha_actualizacion'       => 'required|date',
+            'producto_digital'          => 'required|numeric',
+            'a_favor_de'                => 'required|numeric',
+            'aceptacion_queja'          => 'required|numeric',
+            'rectificacion_queja'       => 'required|numeric',
+            'desistimiento_queja'       => 'required|numeric',
+            'prorroga_queja'            => 'required|numeric',
+            'admision'                  => 'required|numeric',
+            'documentacion_rta_final'   => 'required|boolean',
+            'anexo_queja'               => 'required|boolean',
+            'fecha_cierre'              => 'required|date',
+            'tutela'                    => 'required|numeric',
+            'ente_control'              => 'required|numeric',
+            'marcacion'                 => 'required|numeric',
+            'queja_expres'              => 'required|numeric',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 200);
+        }
+
         $data = [
             'json' => $request->all()
+            // 'json' => $request->except('codigo_queja')
         ];
         
-        $response = $this->sfcClient->sendData('POST', "queja/{$request->codigo_queja}", $data);
+        $response = $this->sfcClient->sendData('PUT', "queja/{$request->codigo_queja}/", $data);
 
         if ($response->status_code == 200) {
 
@@ -222,8 +297,6 @@ class SFCController extends Controller
             }
             //! --< } 
         }
-
-        $this->saveLogFailedRequest($request->path(), $response, $data);
 
         return response()->json($response, $response->status_code);
     }
@@ -238,7 +311,7 @@ class SFCController extends Controller
     {
         if (session()->has('refresh') && session()->has('access')) {
             $currentDateTime = Carbon::now();
-
+            
             if ($currentDateTime->greaterThanOrEqualTo(session('refresh')['expires'])) {
                 $this->login();
             } else {
@@ -246,7 +319,7 @@ class SFCController extends Controller
                     $this->refresh();
                 }
             }
-
+            
         } else {
             $this->login();
         }
@@ -261,16 +334,17 @@ class SFCController extends Controller
      */
     private function setAccess(object $response)
     {
-        if ($response->status_code == 200) {
+        if (isset($response->refresh) && isset($response->access)) {
             session([
                 'refresh' => [
                     'token' => $response->refresh,
-                    'expires' => Carbon::now()->addHours(12)
+                    'expires' => now()->addHours(12)
                 ],
                 'access' => [
-                    'token' => $response->access],
-                    'expires' => Carbon::now()->addMinutes(30)
+                    'token' => $response->access,
+                    'expires' => now()->addMinutes(30)
+                ]
             ]);
-        } 
+        }
     }
 }

@@ -40,7 +40,6 @@ class DCFController extends Controller
             $this->setAccess($response);
         //! <-- }
         
-        $this->saveLogFailedRequest('', $response);
     }
 
     /**
@@ -53,8 +52,6 @@ class DCFController extends Controller
     public function updateComplaint(array $data) : object
     {
         $response = $this->dcfClient->sendData('POST', '', $data);
-
-        $this->saveLogFailedRequest('', $response, $data);
 
         return $response;
     }
