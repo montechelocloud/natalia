@@ -3,6 +3,7 @@
 namespace App\Managers;
 
 use App\Http\Clients\SFCClient;
+use Illuminate\Support\Carbon;
 
 class SFCManager
 {
@@ -15,6 +16,8 @@ class SFCManager
         $this->sfcClient = $sfcClient;
         $this->entityType = (int) env('SFC_ENTITY_TYPE');
         $this->entityCode = env('SFC_ENTITY_CODE');
+
+        $this->verifyAccesses();
     }
 
     public function consultComplaints() : object
@@ -177,6 +180,30 @@ class SFCManager
                     'expires' => now()->addMinutes(30)
                 ]
             ]);
+        }
+    }
+
+    /**
+     * Verifica que la caducidad de los tokens, para solicitarlos de nuevo.
+     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co>
+     *
+     * @return void
+     */
+    private function verifyAccesses()
+    {
+        if (session()->has('refresh') && session()->has('access')) {
+            $currentDateTime = Carbon::now();
+            
+            if ($currentDateTime->greaterThanOrEqualTo(session('refresh')['expires'])) {
+                $this->login();
+            } else {
+                if ($currentDateTime->greaterThanOrEqualTo(session('access')['expires'])) {
+                    $this->refresh();
+                }
+            }
+            
+        } else {
+            $this->login();
         }
     }
 }

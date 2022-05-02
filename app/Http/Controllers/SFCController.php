@@ -7,7 +7,6 @@ use App\Managers\SFCManager;
 use App\Traits\CallControllerMethodTrait;
 use App\Traits\RequestValidator;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 
 class SFCController extends Controller
 {
@@ -20,8 +19,6 @@ class SFCController extends Controller
     {
         $this->sfcManager = $sfcManager;
         $this->dcfManager = $dcfManager;
-
-        $this->verifyAccesses();
     }
 
     /**
@@ -201,29 +198,5 @@ class SFCController extends Controller
         }
 
         return response()->json($response, $response->status_code);
-    }
-
-    /**
-     * Verifica que la caducidad de los tokens, para solicitarlos de nuevo.
-     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co>
-     *
-     * @return void
-     */
-    private function verifyAccesses()
-    {
-        if (session()->has('refresh') && session()->has('access')) {
-            $currentDateTime = Carbon::now();
-            
-            if ($currentDateTime->greaterThanOrEqualTo(session('refresh')['expires'])) {
-                $this->sfcManager->login();
-            } else {
-                if ($currentDateTime->greaterThanOrEqualTo(session('access')['expires'])) {
-                    $this->sfcManager->refresh();
-                }
-            }
-            
-        } else {
-            $this->sfcManager->login();
-        }
     }
 }
