@@ -36,10 +36,11 @@ class SSVClient
         }
 
         $response = $this->client->request($method, $endpoint, $options);
+        
         $statusCode = $response->getStatusCode();
         $response = json_decode($response->getBody()->getContents());
 
-        if ($statusCode == 500 && is_null($response)) {
+        if ($statusCode == 500 || is_null($response)) {
             $response = (object) ['error' => 'Internal Server Error'];
         }
 

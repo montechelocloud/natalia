@@ -75,7 +75,7 @@ Despues de ubicar el directorio se creara un archivo por [cola que se requiera](
 ```shell
 [program:nombre_de_la_cola]
 process_name=%(program_name)s_%(process_num)02d
-command=php ruta_absoluta/artisan queue:nombre_de_la_cola --tries=3 --max-time=3600
+command=php ruta_absoluta/artisan queue:work --queue=nombre_de_la_cola --tries=3
 autostart=true
 autorestart=true
 stopasgroup=true

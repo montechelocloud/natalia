@@ -15,7 +15,12 @@ class SSVManager
 
     public function massCreationOfComplaints(array $complaints)
     {
-        return $this->ssvClient->sendData('POST', 'sfc_all', $complaints);
+        $data = [
+            'json' => [
+                'results' => $complaints
+            ]
+        ];
+        return $this->ssvClient->sendData('POST', 'sfc_all', $data);
     }
 
     public function createComplaint(array $data)
