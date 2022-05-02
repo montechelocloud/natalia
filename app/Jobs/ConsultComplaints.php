@@ -37,27 +37,30 @@ class ConsultComplaints implements ShouldQueue
         $complaintsCodes = [];
         $sfcResponse = $sfcManager->consultComplaints();
         $complaints = $sfcResponse->results;
-        $ssvResponse = $ssvManager->massCreationOfComplaints($complaints);
-        
-        if ($ssvResponse->statusCode == 201) {
-            $complaintsCodes = $sfcManager->getComplaintsCode($complaints);
 
-            while (!is_null($sfcResponse->next) && $ssvResponse->statusCode == 201) {
-                $sfcResponse = $sfcManager->nextPage($sfcResponse->next);
-                $complaints = $sfcResponse->results;
-                $ssvResponse = $ssvManager->massCreationOfComplaints($complaints);
-                if ($ssvResponse->statusCode == 201) {
-                    $complaintsCodes = array_merge($complaintsCodes, $sfcManager->getComplaintsCode($complaints));
+        if (count($complaints)) {
+            $ssvResponse = $ssvManager->massCreationOfComplaints($complaints);
+
+            if ($ssvResponse->statusCode == 201) {
+                $complaintsCodes = $sfcManager->getComplaintsCode($complaints);
+    
+                while (!is_null($sfcResponse->next) && $ssvResponse->statusCode == 201) {
+                    $sfcResponse = $sfcManager->nextPage($sfcResponse->next);
+                    $complaints = $sfcResponse->results;
+                    $ssvResponse = $ssvManager->massCreationOfComplaints($complaints);
+                    if ($ssvResponse->statusCode == 201) {
+                        $complaintsCodes = array_merge($complaintsCodes, $sfcManager->getComplaintsCode($complaints));
+                    }
+                }
+    
+                $ssvResponse = $sfcManager->synchronizeComplaints($complaintsCodes);
+    
+                if (count($ssvResponse->pqrs_error)) {
+                    Log::info("Error al sincronizar las quejas:\n" . json_encode($ssvResponse->pqrs_error));
                 }
             }
-
-            $ssvResponse = $sfcManager->synchronizeComplaints($complaintsCodes);
-
-            if (count($ssvResponse->pqrs_error)) {
-                Log::info("Error al sincronizar las quejas:\n" . json_encode($ssvResponse->pqrs_error));
-            }
         }
-
+        
         $this->dispatch()->onQueue('get_complaints')->delay(now()->addMinutes($this->MINUTES));
     }
 }
