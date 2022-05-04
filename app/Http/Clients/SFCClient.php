@@ -57,7 +57,6 @@ class SFCClient
         $response = $this->client->request($method, $endpoint, $options);
         $statusCode = $response->getStatusCode();
         $response = json_decode($response->getBody()->getContents());
-        // dd($response);
 
         if ($statusCode == 500 && is_null($response)) {
             $response = (object) ['error' => 'Internal Server Error'];
@@ -79,6 +78,7 @@ class SFCClient
     private function getSignature($payload) : string
     {
         $signature = hash_hmac('SHA256', $this->dataAsString($payload), env('SFC_SECRET_KEY'));
+
 
         return strtoupper($signature);
     }

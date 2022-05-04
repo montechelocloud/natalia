@@ -97,7 +97,7 @@ class SFCManager
         }
 
         $data = [
-            'payload' => $request->only('codigo_queja', 'type'),
+            'payload' => $request->only('type', 'codigo_queja'),
             'multipart' => $multipartData,
         ];
 
