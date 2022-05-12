@@ -17,9 +17,6 @@ use Illuminate\Support\Facades\Route;
 Route::post('login', 'UserController@authenticate');
 
 //? Rutas para el consumo desde el CRM
-// Route::post('complaints/create', function () {
-//     dd($request);
-// });
 Route::prefix('sfc')->group( function () {
     Route::get('complaints', 'SFCController@getComplaints');
     Route::get('complaints/{complaintId}', 'SFCController@getComplaint');

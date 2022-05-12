@@ -285,19 +285,19 @@ class SFCController extends Controller
         
         $response = $this->sfcClient->sendData('PUT', "queja/{$request->codigo_queja}/", $data);
 
-        if ($response->status_code == 200) {
+        // if ($response->status_code == 200) {
 
-            $dcfResponse = $this->callControllerMethod('DCFController', 'updateComplaint', $data);
-            //! No esta definida la respuesta de la Defensoria
-            //! Tener en cuenta para darle el respectivo tratamiento
-            //! para notificar al crm { -->
-            if ($dcfResponse->status_code == 200) {
-                $response->dcfResponse = $dcfResponse;
-            }
-            //! --< } 
-        }
+        //     $dcfResponse = $this->callControllerMethod('DCFController', 'updateComplaint', $data);
+        //     //! No esta definida la respuesta de la Defensoria
+        //     //! Tener en cuenta para darle el respectivo tratamiento
+        //     //! para notificar al crm { -->
+        //     if ($dcfResponse->status_code == 200) {
+        //         $response->dcfResponse = $dcfResponse;
+        //     }
+        //     //! --< } 
+        // }
 
-        return response()->json($response, $response->status_code);
+        return response()->json($response, $response->status_code ?? 200);
     }
 
     /**
