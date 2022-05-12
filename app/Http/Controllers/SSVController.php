@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Clients\SSVClient;
+use App\Managers\SSVManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class SSVController extends Controller
 {
-    private $ssvClient;
+    private $ssvManager;
 
-    public function __construct(SSVClient $ssvClient)
+    public function __construct(SSVManager $ssvManager)
     {
-        $this->ssvClient = $ssvClient;    
+        $this->ssvManager = $ssvManager;    
     }
 
     /**
@@ -30,7 +30,7 @@ class SSVController extends Controller
         //     return response()->json($validator->errors(), 200);
         // }
 
-        $response = $this->ssvClient->sendData('POST', '', []);
+        $response = $this->ssvManager->createComplaint($request->all());
 
         return response()->json($response, $response->status());
     }
@@ -42,16 +42,16 @@ class SSVController extends Controller
      * @param Request $request
      * @return Illuminate\Http\Response
      */
-    public function updateComplaint(Request $request)
-    {
+    // public function updateComplaint(Request $request)
+    // {
         // $validator = Validator::make($request->all(), []);
 
         // if ($validator->fails()) {
         //     return response()->json($validator->errors(), 200);
         // }
 
-        $response = $this->ssvClient->sendData('POST', '', []);
+    //     $response = $this->ssvClient->sendData('POST', '', []);
 
-        return response()->json($response, $response->status());
-    }
+    //     return response()->json($response, $response->status());
+    // }
 }

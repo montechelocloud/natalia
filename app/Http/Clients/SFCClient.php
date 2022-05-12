@@ -79,6 +79,7 @@ class SFCClient
     {
         $signature = hash_hmac('SHA256', $this->dataAsString($payload), env('SFC_SECRET_KEY'));
 
+
         return strtoupper($signature);
     }
 

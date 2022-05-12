@@ -2,70 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Clients\SFCClient;
+use App\Managers\DCFManager;
+use App\Managers\SFCManager;
 use App\Traits\CallControllerMethodTrait;
+use App\Traits\RequestValidator;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Validator;
 
 class SFCController extends Controller
 {
-    use CallControllerMethodTrait;
+    use CallControllerMethodTrait, RequestValidator;
 
-    private $sfcClient;
-    private $entityType;
-    private $entityCode;
+    private $sfcManager;
+    private $dcfManager;
 
-    public function __construct(SFCClient $sfcClient)
+    public function __construct(SFCManager $sfcManager, DCFManager $dcfManager)
     {
-        $this->sfcClient = $sfcClient;
-        $this->entityType = (int) env('SFC_ENTITY_TYPE');
-        $this->entityCode = env('SFC_ENTITY_CODE');
-
-        $this->verifyAccesses();
-    }
-
-    /**
-     * Loguea al web service en la SFC (Superintendencia Financiera de Colombia).
-     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co> 
-     *
-     * @return void
-     */
-    private function login()
-    {
-        $data = [
-            'json' => [
-                'username' => env('SFC_USERNAME'),
-                'password' => env('SFC_PASSWORD')
-            ]
-        ];
-
-        $response = (new SFCClient(false))->sendData('POST', 'login', $data, false);
-
-        $this->setAccess($response);        
-    }
-
-    /**
-     * Refresca el token de acceso a la SFC (Superintendencia Financiera de Colombia).
-     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co> 
-     *
-     * @return void
-     */
-    private function refresh()
-    {
-        $data = [
-            'json' => [
-                'refresh' => session('refresh')['token']
-            ]
-        ];
-
-        $response = $this->sfcClient->sendData('POST', 'token/refresh', $data);
-
-        if (isset($response->status_code)) {
-            $this->login();
-        }
-
-        $this->setAccess($response);
+        $this->sfcManager = $sfcManager;
+        $this->dcfManager = $dcfManager;
     }
 
     /**
@@ -76,7 +29,7 @@ class SFCController extends Controller
      */
     public function getComplaints()
     {
-        $response = $this->sfcClient->sendData('GET', 'queja/');
+        $response = $this->sfcManager->consultComplaints();
 
         return response()->json($response, 200);
     }
@@ -85,12 +38,11 @@ class SFCController extends Controller
      * Obtiene la queja solicitada.
      * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co>
      *
-     * @param integer $complaintId
      * @return Illuminate\Http\Response
      */
-    public function getComplaint(int $complaintId)
+    public function getComplaint($complaintId)
     {
-        $response = $this->sfcClient->sendData('GET', "queja/$complaintId/");
+        $response = $this->sfcManager->consultComplaints($complaintId);
 
         return response()->json($response, $response->status_code ?? 200);
     }
@@ -104,19 +56,11 @@ class SFCController extends Controller
      */
     public function ack(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $this->dataValidate($request->all(), [
             'pqrs' => 'required|array'
         ]);
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 200);
-        }
-        
-        $data = [
-            'json' => $request->only('pqrs')
-        ];
-
-        $response = $this->sfcClient->sendData('POST', 'complaint/ack', $data);
+        $response = $this->sfcManager->synchronizeComplaints($request->pqrs);
 
         return response()->json($response, 200);
     }
@@ -130,7 +74,7 @@ class SFCController extends Controller
      */
     public function getFile(int $fileId)
     {
-        $response = $this->sfcClient->sendData('GET', "storage/$fileId/");
+        $response = $this->sfcManager->getFile($fileId);
         
         return response()->json($response, $response->status_code ?? 200);
     }
@@ -144,7 +88,7 @@ class SFCController extends Controller
      */
     public function getComplaintFiles(string $complaintId)
     {
-        $response = $this->sfcClient->sendData('GET', "storage/?codigo_queja__codigo_queja=$complaintId");
+        $response = $this->sfcManager->getComplaintFiles($complaintId);
         
         return response()->json($response, 200);
     } 
@@ -158,7 +102,7 @@ class SFCController extends Controller
      */
     public function createComplaint(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $this->dataValidate($request->all(), [
             'codigo_queja'      => 'required|string',
             'codigo_pais'       => 'required|numeric',
             'departamento_cod'  => 'required|string',
@@ -179,19 +123,7 @@ class SFCController extends Controller
             'ente_control'      => 'required|numeric',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 200);
-        }
-
-        $data = [
-            'json' => array_merge([
-                'tipo_entidad' => $this->entityType,
-                'entidad_cod' => $this->entityCode,
-                'codigo_queja' => $this->entityType . $this->entityCode . $request->codigo_queja
-            ], $request->except('codigo_queja'))
-        ];
-
-        $response = $this->sfcClient->sendData('POST', 'queja/', $data);
+        $response = $this->sfcManager->createComplaint($request);
 
         return response()->json($response, $response->status_code ?? 200);
     }
@@ -205,37 +137,13 @@ class SFCController extends Controller
      */
     public function fileUpload(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $this->dataValidate($request->all(), [
             'file'          => 'required|file',
             'codigo_queja'  => 'required|string',
             'type'          => 'required|string'
         ]);
-        
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 200);
-        }
 
-        $multipartData = [];
-
-        foreach ($request->all() as $key => $value) {
-            if ($key == 'file') {
-                $file = $request->file('file');
-                $multipartData[] = [
-                    'name' => $key,
-                    'contents' => $file->getContent(),
-                    'filename' => $file->getClientOriginalName(),
-                ]; 
-            } else {
-                $multipartData[] = ['name' => $key, 'contents' => $value]; 
-            }
-        }
-
-        $data = [
-            'payload' => $request->only('codigo_queja', 'type'),
-            'multipart' => $multipartData,
-        ];
-
-        $response = $this->sfcClient->sendData('POST', 'storage/', $data);
+        $response = $this->sfcManager->fileUpload($request);
 
         return response()->json($response, $response->status_code ?? 200);
     }
@@ -249,7 +157,7 @@ class SFCController extends Controller
      */
     public function updateComplaint(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $this->dataValidate($request->all(), [
             'codigo_queja'              => 'required|string',
             'sexo'                      => 'required|numeric',
             'lgbtiq'                    => 'required|numeric',
@@ -274,16 +182,8 @@ class SFCController extends Controller
             'marcacion'                 => 'required|numeric',
             'queja_expres'              => 'required|numeric',
         ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 200);
-        }
-
-        $data = [
-            'json' => $request->all()
-        ];
         
-        $response = $this->sfcClient->sendData('PUT', "queja/{$request->codigo_queja}/", $data);
+        $response = $this->sfcManager->updateComplaint($request);
 
         // if ($response->status_code == 200) {
 
@@ -298,52 +198,5 @@ class SFCController extends Controller
         // }
 
         return response()->json($response, $response->status_code ?? 200);
-    }
-
-    /**
-     * Verifica que la caducidad de los tokens, para solicitarlos de nuevo.
-     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co>
-     *
-     * @return void
-     */
-    private function verifyAccesses()
-    {
-        if (session()->has('refresh') && session()->has('access')) {
-            $currentDateTime = Carbon::now();
-            
-            if ($currentDateTime->greaterThanOrEqualTo(session('refresh')['expires'])) {
-                $this->login();
-            } else {
-                if ($currentDateTime->greaterThanOrEqualTo(session('access')['expires'])) {
-                    $this->refresh();
-                }
-            }
-            
-        } else {
-            $this->login();
-        }
-    }
-
-    /**
-     * Establece los tokens de acceso en la session y en el momento que caducan.
-     * @author Edwin David Sanchez Balbin <e.sanchez@montechelo.com.co>
-     *
-     * @param object $response
-     * @return void
-     */
-    private function setAccess(object $response)
-    {
-        if (isset($response->refresh) && isset($response->access)) {
-            session([
-                'refresh' => [
-                    'token' => $response->refresh,
-                    'expires' => now()->addHours(12)
-                ],
-                'access' => [
-                    'token' => $response->access,
-                    'expires' => now()->addMinutes(30)
-                ]
-            ]);
-        }
     }
 }
