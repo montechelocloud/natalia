@@ -110,7 +110,7 @@ class SFCManager
             'json' => array_merge([
                 'tipo_entidad' => $this->entityType,
                 'entidad_cod' => $this->entityCode,
-                'codigo_queja' => $this->entityType . $this->entityCode . $request->codigo_queja
+                'codigo_queja' => $request->codigo_queja
             ], $request->except('codigo_queja'))
         ];
         
