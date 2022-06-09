@@ -27,7 +27,7 @@ class SFCManager
 
     public function consultComplaint($complaintId) : object
     {
-        return $this->sfcClient->sendData('GET', "queja/$complaintId/");
+        return $this->sfcClient->sendData('POST', "queja/$complaintId/");
     }
 
     public function getComplaintsCode(array $complaints) : array

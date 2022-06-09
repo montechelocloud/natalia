@@ -42,7 +42,7 @@ class SFCController extends Controller
      */
     public function getComplaint($complaintId)
     {
-        $response = $this->sfcManager->consultComplaints($complaintId);
+        $response = $this->sfcManager->consultComplaint($complaintId);
 
         return response()->json($response, $response->status_code ?? 200);
     }

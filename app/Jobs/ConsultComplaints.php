@@ -62,7 +62,7 @@ class ConsultComplaints implements ShouldQueue
             }
         }
         
-        $this->dispatch()->onQueue('get_complaints')->delay(now()->addMinutes(10));
+        $this->dispatch()->onQueue('get_complaints')->delay(now()->addMinutes(1));
             
     }
 }
