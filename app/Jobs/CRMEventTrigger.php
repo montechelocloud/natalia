@@ -31,10 +31,7 @@ class CRMEventTrigger implements ShouldQueue
      */
     public function handle(SSVClient $ssvClient)
     {
-        $ssvClient->sendData('GET', 'sfc_registrar', []);
         $ssvClient->sendData('GET', 'sfc_modificar', []);
-        $ssvClient->sendData('GET', 'sfc_sendfile', []);
-        $ssvClient->sendData('GET', 'sfc_ack', []);
 
         $this->dispatch()->onQueue('crm_event_trigger')->delay(now()->addMinutes(1));
 
