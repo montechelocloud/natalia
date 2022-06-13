@@ -33,8 +33,8 @@ class SFCManager
     public function getComplaintsCode(array $complaints) : array
     {
         $complaintCodes = [];
-        foreach ($complaints as $key => $complaint) {
-            $complaintCodes = $complaint->codigo_queja;
+        foreach ($complaints as $complaint) {
+            $complaintCodes[] = $complaint->codigo_queja;
         }
 
         return $complaintCodes;
