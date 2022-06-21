@@ -32,9 +32,7 @@ class CRMEventTrigger implements ShouldQueue
     public function handle(SSVClient $ssvClient)
     {
         $ssvClient->sendData('GET', 'sfc_modificar', []);
-
-        $this->dispatch()->onQueue('crm_event_trigger')->delay(now()->addMinutes(1));
-
+        
         $now = now('America/Bogota');
         $hour = $now->hour;
 
