@@ -44,9 +44,9 @@ class SSVClient
             $response = (object) ['error' => 'Internal Server Error'];
         }
 
-        if ($statusCode != 200 && $statusCode != 201) {
-            $this->saveLogFailedRequest($statusCode, $response, $data);
-        }
+        // if ($statusCode != 200 && $statusCode != 201) {
+        //     $this->saveLogFailedRequest($statusCode, $response, $data);
+        // }
 
         return $response;
     }

@@ -32,16 +32,15 @@ class CRMEventTrigger implements ShouldQueue
     public function handle(SSVClient $ssvClient)
     {
         $ssvClient->sendData('GET', 'sfc_modificar', []);
-        
+
         $now = now('America/Bogota');
         $hour = $now->hour;
 
         if (($hour >= 18 && $hour <= 23) || ($hour >= 0 && $hour < 5)) {
-            $this->dispatch()->onQueue('crm_event_trigger')->delay(now()->addMinutes(1));
+            $this->dispatch()->onQueue('crm_event_trigger')->delay(now('America/Bogota')->addMinutes(1));
         } else {
             $nextExecutionTime = Carbon::createFromTimeString('18:00:00', 'America/Bogota');
             $this->dispatch()->onQueue('crm_event_trigger')->delay($nextExecutionTime);
-            
         }
     }
 }
