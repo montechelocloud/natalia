@@ -2,9 +2,9 @@
 
 namespace App\Jobs;
 
+use App\Http\Clients\SSVClient;
 use App\Managers\SFCManager;
 use App\Managers\SSVManager;
-use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -31,7 +31,7 @@ class ConsultComplaints implements ShouldQueue
      *
      * @return void
      */
-    public function handle(SFCManager $sfcManager, SSVManager $ssvManager)
+    public function handle(SFCManager $sfcManager, SSVManager $ssvManager, SSVClient $ssvClient)
     {
         $complaintsCodes = [];
         $sfcResponse = $sfcManager->consultComplaints();
@@ -61,6 +61,8 @@ class ConsultComplaints implements ShouldQueue
                 }
             }
         }
+
+        $ssvClient->sendData('GET', 'sfc_readfile', []);
         
         $this->dispatch()->onQueue('get_complaints')->delay(now()->addMinutes(1));
             
