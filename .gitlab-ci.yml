@@ -6,7 +6,7 @@ stages:
 build-job:  
   stage: build
   tags:
-    - nataprueba-back-nata    # This job runs in the build stage, which runs first.
+    - nataprueba-back-natadev    # This job runs in the build stage, which runs first.
   script:    
     - echo "Creacion Carpeta"
     - mkdir NataFolder
@@ -15,7 +15,7 @@ build-job:
 first-test-job:
   stage: test
   tags:
-    - nataprueba-back-nata  # This job runs in the test stage.
+    - nataprueba-back-natadev  # This job runs in the test stage.
   script:
     - echo "Running unit tests... This will take about 60 seconds."
     - sleep 60
@@ -30,5 +30,5 @@ deploy-job:
     - git status
     - echo "Application successfully deployed."
   tags:
-    - nataprueba-back-nata
+    - nataprueba-back-natadev
 
