@@ -1,4 +1,13 @@
-stages:          # List of stages for jobs, and their order of execution
+deploy:
+    only:
+        - master
+        - merge request
+        
+    stage: master
+    
+
+stages:  
+  - master        # List of stages for jobs, and their order of execution
   - build
   - test
   - deploy
@@ -6,7 +15,9 @@ stages:          # List of stages for jobs, and their order of execution
 build-job:       # This job runs in the build stage, which runs first.
   stage: build
   script:
+    - cd /var/www/mios/mios-backend/pruebasnata-back-v2
     - echo "Empezando Despliegue"
+    - git status
     - mkdir NataFolder
     - echo "Finalizando Despliegue-Aplicacion binary" > NataFolder/executable-binary-file-v1
 
@@ -25,15 +36,16 @@ lint-test-job:   # This job also runs in the test stage.
     - sleep 10
     - echo "No lint issues found."
 
-nata-test-job:     
-  stage: test    # It can run at the same time as unit-test-job (in parallel).
-  script:
-    - echo "Linting code... This will take about 10 seconds."
-    - sleep 10
-    - echo "No lint issues found."
-
-deploy-job:      # This job runs in the deploy stage.
+deploy-job:
+  only:
+        - master
+        - merge request
+        
+  stage: master      # This job runs in the deploy stage.
   stage: deploy  # It only runs when *both* jobs in the test stage complete successfully.
   script:
     - echo "Deploying application..."
     - echo "Application successfully deployed."
+
+tags:
+    - nata-prueba-back-nata
