@@ -36,9 +36,10 @@ nata-test-job:
 deploy-job:
   Only:
     - master
-    - marge request    
+    - marge request 
+
   stage: master
-  stage: deploy  # It only runs when *both* jobs in the test stage complete successfully.
+  
   script:
     - cd /var/www/mios/mios-backend/pruebasnata-back-v2
     - echo "Deploying application..."
