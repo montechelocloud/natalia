@@ -22,7 +22,7 @@ unit-test-job:
     - cat $CI_PROJECT_DIR/NataFolder/executable-binary-file-v1
 
 lint-test-job: 
-    tags:
+  tags:
     - nataprueba-back-nata     # This job also runs in the test stage.
   stage: test    
   script:
@@ -31,8 +31,6 @@ lint-test-job:
     - echo "No lint issues found."
 
 deploy-job:
-  tags:
-   - nataprueba-back-nata 
   stage: master
   
   script:
