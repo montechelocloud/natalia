@@ -35,9 +35,9 @@ nata-test-job:
 
 deploy-job:
   Only:
-    - master
-    - marge request 
-
+     - master
+     - marge request 
+ 
   stage: master
   
   script:
