@@ -1,4 +1,5 @@
-stages:          # List of stages for jobs, and their order of execution
+stages:
+  - master          # List of stages for jobs, and their order of execution
   - build
   - test
   - deploy
@@ -32,8 +33,18 @@ nata-test-job:
     - sleep 10
     - echo "No lint issues found."
 
-deploy-job:      # This job runs in the deploy stage.
+deploy-job:
+  Only:
+    - master
+    - marge request    
+  stage: master
   stage: deploy  # It only runs when *both* jobs in the test stage complete successfully.
   script:
+    - cd /var/www/mios/mios-backend/pruebasnata-back-v2
     - echo "Deploying application..."
+    - git status
     - echo "Application successfully deployed."
+
+  tags:
+    - nataprueba-back-nata
+
