@@ -6,6 +6,7 @@ stages:
 
 build-job:       # This job runs in the build stage, which runs first.
   stage: build
+  state: master
   tags:
   - nataprueba-back-nata
   script:
