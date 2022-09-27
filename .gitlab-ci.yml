@@ -9,8 +9,7 @@ build-job:
     - nataprueba-back-nata    # This job runs in the build stage, which runs first.
   stage: build
 
-  script:
-    - cd /var/www/mios/mios-backend/mios-pruebasnata-back-v2
+  script:    
     - echo "Creacion Carpeta"
     - mkdir NataFolder
     - echo "Finalizando Creacion carpeta Creacion-Aplicacion binary" > NataFolder/executable-binary-file-v1
