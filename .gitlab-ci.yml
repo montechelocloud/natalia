@@ -5,8 +5,8 @@ stages:
 
 build-job:  
   stage: build
-#  tags:
-#    - nataprueba-back-natadev   
+  tags:
+    - nataprueba-back-nata  
   script:    
     - echo "Compiling the Code"
     - echo "Compile complete"
@@ -29,6 +29,8 @@ first-test-job:
 
 deploy-job:
   stage: master 
+  tags:
+    - nataprueba-back-nata 
   script:
     #- cd /var/www/mios/mios-backend/pruebasnata-back-v2
     - echo "Deploying application..."
