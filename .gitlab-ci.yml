@@ -1,7 +1,7 @@
 stages:
   - build
   - test
-  - deploy
+  - master
 
 build-job:  
   stage: build
@@ -14,7 +14,7 @@ build-job:
     - echo "My Aplicacion binary file" > NataFolder/executable-binary-file-v1
   artifacts:
     paths:
-      -NataFolder/executable-binary-file-v1  
+      - NataFolder/executable-binary-file-v1  
 
 first-test-job:
   stage: test
@@ -28,15 +28,6 @@ first-test-job:
     - cat $CI_PROJECT_DIR/NataFolder/executable-binary-file-v1
 
 deploy-job:
-  stage: master 
-  script:
-    - cd /var/www/mios/mios-backend/pruebasnata-back-v2
-    - echo "Deploying application..."
-    - git status
-    - echo "Application successfully deployed."
-  tags:
-    - nataprueba-back-natadev
-deploy-job2:
   stage: master 
   script:
     #- cd /var/www/mios/mios-backend/pruebasnata-back-v2
