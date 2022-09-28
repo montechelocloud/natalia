@@ -2,11 +2,10 @@ stages:
   - build
   - test
   - master
-
 build-job:  
   stage: build
   tags:
-    - nataprueba-back-nata  
+    - nataprueba-back-natadev
   script:    
     - echo "Compiling the Code"
     - echo "Compile complete"
@@ -19,7 +18,7 @@ build-job:
 first-test-job:
   stage: test
   tags:
-    - nataprueba-back-nata 
+    - nataprueba-back-natadev
   script:
     - echo "Running unit tests... This will take about 60 seconds."
     #- mkdir NataFolder
@@ -30,7 +29,7 @@ first-test-job:
 deploy-job:
   stage: master 
   tags:
-    - nataprueba-back-nata 
+    - nataprueba-back-natadev
   script:
     #- cd /var/www/mios/mios-backend/pruebasnata-back-v2
     - echo "Deploying application..."
