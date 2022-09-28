@@ -15,9 +15,10 @@ build-job:
 first-test-job:
   stage: test
   tags:
-    - nataprueba-back-natadev  # This job runs in the test stage.
+    - nataprueba-back-natadev
   script:
     - echo "Running unit tests... This will take about 60 seconds."
+    - mkdir NataFolder
     - sleep 60
     - echo "Code coverage is 90%"
     - cat NataFolder/executable-binary-file-v1
