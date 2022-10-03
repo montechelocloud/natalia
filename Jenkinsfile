@@ -1,22 +1,38 @@
 pipeline {
     agent any
     stages {
-       stage('build') {
-          steps {
-             echo 'Notify GitLab'
-             updateGitlabCommitStatus name: 'build', state: 'pending'
-             echo 'build step goes here'
-             updateGitlabCommitStatus name: 'build', state: 'success'
-          }
-       }
-       stage(test) {
-           steps {
-               echo 'Notify GitLab'
-               updateGitlabCommitStatus name: 'test', state: 'pending'
-               echo 'test step goes here'
-               updateGitlabCommitStatus name: 'test', state: 'success'
-
-           }
-       }
+        stage('Build') {
+            steps {
+                echo 'Start Building'
+                echo 'Finish Building'
+            }
+        }
+        stage('Test') {
+            steps {
+                echo 'Start Testing 1'
+                echo "Finish Testing 1"
+            }
+        }
+        stage('Test') {
+            steps {
+                echo 'Compiling the code'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo 'Start Deploy'
+            }
+        }
     }
- }
+}
+
+pipeline {
+    agent any
+    stages {
+        stage('Stage 1') {
+            steps {
+                echo 'Compiling the code'
+            }
+        }
+    }
+}
