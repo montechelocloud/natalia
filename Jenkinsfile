@@ -10,7 +10,6 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Start Testing 1'
-                - cat .env
                 echo "Finish Testing 1"
             }
         }
