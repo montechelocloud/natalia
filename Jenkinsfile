@@ -7,8 +7,8 @@ node {
   remote.allowAnyHosts = true
 
   stage('Conexion_server') {
-    sshCommand remote: remote, command: "cd /var/www/mios/mios-backend/pruebasnata-back-v2"
-    sshCommand remote: remote, command: "git status"
+    sh 'cd /var/www/mios/mios-backend/pruebasnata-back-v2'
+    sh 'git status'
   }
 
   stage('Test1') {
