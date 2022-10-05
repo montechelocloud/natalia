@@ -1,6 +1,6 @@
 node {
   def remote = [:]
-  remote.name = 'Nata'
+  remote.name = 'Nata_Pruebas'
   remote.host = '172.17.8.48'
   remote.user = 'root'
   remote.password = 'Control2022*'
