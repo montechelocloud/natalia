@@ -4,7 +4,6 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Start Building'
-                - mkdir Nata
                 echo 'Finish Building'
             }
         }
@@ -18,7 +17,6 @@ pipeline {
         stage('Test2') {
             steps {
                 echo 'Start Testing 2'
-                - cat .env
                 echo "Finish Testing 2"
             }
         }
