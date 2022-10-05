@@ -1,36 +1,23 @@
-pipeline {
-    agent any
-    stages {
-        stage('Build') {
-            steps {
-                echo 'Start Building'
-                echo 'Finish Building'
-            }
-        }
-        stage('Test') {
-            steps {
-                echo 'Start Testing 1'
-                echo "Finish Testing 1"
-            }
-        }
-        stage('Test2') {
-            steps {
-                echo 'Start Testing 2'
-                echo "Finish Testing 2"
-            }
-        }
-        stage('Deploy') {
-            steps {
-                echo 'Start Deploy'
-                echo ''
-            }
-        }
+node {
+  def remote = [:]
+  remote.name = 'Nata'
+  remote.host = '172.17.8.48'
+  remote.user = 'root'
+  remote.password = 'Control2022*'
+  remote.allowAnyHosts = true
 
-        stage('Deploy2') {
-            steps {
-                echo 'Start Deploy'
-                echo ''
-            }
-        }
-    }
+  stage('Conexion_server') {
+    sshCommand remote: remote, command: "echo "conexion establecida""
+    sshCommand remote: remote, command: "cd /var/www/mios/mios-backend/pruebasnata-back-v2"
+    sshCommand remote: remote, command: "git status"
+  }
+
+  stage('Test1') {
+    sshCommand remote: remote, command: "echo "inicio test""
+  }
+
+  stage('Deploy') {
+    sshCommand remote: remote, command: "git pull"
+    sshCommand remote: remote, command: "php artisan cache:clear"
+  }
 }
