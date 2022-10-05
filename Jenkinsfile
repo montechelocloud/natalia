@@ -4,30 +4,27 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Start Building'
-                - git status
-                - git checkout master
+                - mkdir Nata
                 echo 'Finish Building'
             }
         }
         stage('Test') {
             steps {
                 echo 'Start Testing 1'
-                - git status
+                - cat .env
                 echo "Finish Testing 1"
             }
         }
         stage('Test2') {
             steps {
                 echo 'Start Testing 2'
-                - git status
+                - cat .env
                 echo "Finish Testing 2"
             }
         }
         stage('Deploy') {
             steps {
                 echo 'Start Deploy'
-                - git status
-                - git pull origin master
                 echo ''
             }
         }
