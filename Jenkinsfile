@@ -5,8 +5,7 @@ node {
   remote.user = 'root'
   remote.password = 'Control2022*'
   remote.allowAnyHosts = true
-  sshagent (credentials: ['Natalia_Pruebas']) {
-    stage('Conexion_server') {
+      stage('Conexion_server') {
      sh 'cd /var/www/mios/mios-backend/pruebasnata-back-v2'
      sh 'git status'
       }
@@ -16,5 +15,4 @@ node {
     stage('Test1') {
      sh 'echo "inicio test'
   }
-}
 }
