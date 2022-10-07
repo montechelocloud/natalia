@@ -16,3 +16,4 @@ pipeline {
       stage('Deploy SSH') {
         sshCommand remote: remote, command: "echo "Conexion Finish""
 }
+}
