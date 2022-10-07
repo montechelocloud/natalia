@@ -1,6 +1,5 @@
 pipeline {
-  node {
-          label 'Soul-Pruebas' {
+  agent'Soul-Pruebas' {
       stage('Conexion_server') {
               sh "pwd"
               sh "cd /var/www/mios/mios-backend/pruebasnata-back-v2"
@@ -18,4 +17,4 @@ pipeline {
 
           }
       }
-  }
+  
