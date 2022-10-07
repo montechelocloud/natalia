@@ -1,5 +1,5 @@
 pipeline {
-nodenode {
+node {
         label 'Soul-Pruebas' {
      stage('Conexion_server') {
              sh "pwd"
