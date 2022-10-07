@@ -1,13 +1,13 @@
-pipeline {
-    agent any
-    def remote = [:]
-    remote.name = 'Soul-Pruebas'
-    remote.host = '172.17.8.48'
-    remote.user = 'root'
-    remote.password = 'Control2022*'
-    remote.allowAnyHosts = true
-    stage('Remote SSH') {
-      sshCommand remote: remote, command: "ls -lrt"
-
-        }
+pipeline{
+   agent any
+   stages{
+      stage('login server'){
+         steps{
+            sshagent(credentials:['Control2022*']){
+               sh 'ssh  -o StrictHostKeyChecking=no  root@172.17.8.48 uptime "whoami"'
+          }
+        echo "success lgoin"
+         }
+       }
+   }
 }
