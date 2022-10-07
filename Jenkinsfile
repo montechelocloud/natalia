@@ -1,10 +1,13 @@
 pipeline {
     agent any
-    stages {
-      stage('Test SSH') {
-          sh 'ssh root@172.17.8.48 cd /var/www/mios/mios-backend/pruebasnata-back-v2'
-          sh 'ssh root@172.17.8.48 ll'
-          sh 'echo 'Fin Conexion''
+    def remote = [:]
+    remote.name = 'Soul-Pruebas'
+    remote.host = '172.17.8.48'
+    remote.user = 'root'
+    remote.password = 'Control2022*'
+    remote.allowAnyHosts = true
+    stage('Remote SSH') {
+      sshCommand remote: remote, command: "ls -lrt"
+
         }
-}
 }
