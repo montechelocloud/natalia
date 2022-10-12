@@ -1,0 +1,40 @@
+config:
+  credentials_id: Servers_Montechelo
+
+remote_groups:
+  r_group_1:
+    - name: Develop
+      host: 172.17.9.133
+    - name: Demo
+      host: 172.17.9.181
+  r_group_2:
+    - name: Qa
+      host: 172.17.8.12
+
+command_groups:
+  c_group_1:
+    - commands:
+        - 'ip a'
+        - 'whoami'
+    - scripts:
+        - 'test.sh'
+  c_group_2:
+    - gets:
+        - from: 'test.sh'
+          to: 'test_new.sh'
+    - puts:
+        - from: 'test.sh'
+          to: '.'
+    - removes:
+        - 'test.sh'
+
+steps:
+  deploy:
+    - remote_groups:
+        - r_group_1
+      command_groups:
+        - c_group_1
+    - remote_groups:
+        - r_group_2
+      command_groups:
+        - c_group_2

@@ -1,0 +1,47 @@
+#!/usr/bin/groovy
+def call(String deployprueba.yaml) {
+    def yaml = readYaml file: deployprueba.yaml
+    withCredentials([usernamePassword(credentialsId: yaml.config.Servers_Montechelo, passwordVariable: '*D3v0psM3L0P3l4:D!', usernameVariable: 'root')]) {
+        yaml.steps.each { stageName, step ->
+            step.each {
+                def remoteGroups = [:]
+                def allRemotes = []
+                it.remote_groups.each {
+                    remoteGroups[it] = yaml.remotes."$it"
+                }
+
+                def commandGroups = [:]
+                it.command_groups.each {
+                    commandGroups[it] = yaml.commands."$it"
+                }
+                def isSudo = false
+                remoteGroups.each { r_group_1, remotes ->
+                    allRemotes += remotes.collect { remote ->
+                        if(!remote.name)
+                            remote.name = remote.host
+                        remote.user = "root"
+                        remote.password = "*D3v0psM3L0P3l4:D!"
+                        remote.allowAnyHosts = true
+                        remote.groupName = r_group_1
+                        remote
+                    }
+                }
+                if(allRemotes) {
+                    if(allRemotes.size() > 1) {
+                        def stepsForParallel = allRemotes.collectEntries { remote ->
+                            ["${remote.r_group_1}-${remote.name}" : transformIntoStep(stageName, remote.r_group_1, remote, commandGroups)]
+                        }
+                        stage(stageName) {
+                            parallel stepsForParallel
+                        }
+                    } else {
+                        def remote = allRemotes.first()
+                        stage(stageName + "\n" + remote.r_group_1 + "-" + remote.name) {
+                            transformIntoStep(stageName, remote.r_group_1, remote, commandGroups).call()
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
